@@ -2,7 +2,7 @@
 
 Billable is a powerful yet simple time tracking application built with Flutter. It helps freelancers, consultants, and professionals track their billable hours, manage clients, projects, and tasks, and generate reports for invoicing.
 
-<img src="screenshots/app_preview.png" alt="Billable App Preview" width="250"/>
+<img src="screenshots/entries-screen.png" alt="Billable App Preview" width="250"/>
 
 ## Features
 
@@ -11,6 +11,8 @@ Billable is a powerful yet simple time tracking application built with Flutter. 
 - **Billable/Non-billable**: Mark entries as billable or non-billable
 - **Submission Status**: Track which time entries have been submitted for invoicing
 - **Notes**: Add detailed notes to each time entry
+
+<img src="screenshots/time-entry-screen.png" alt="Billable App Preview" width="250"/>
 
 ### Client, Project, and Task Management
 - **Hierarchical Organization**: Structure your work with clients, projects, and tasks
@@ -22,11 +24,16 @@ Billable is a powerful yet simple time tracking application built with Flutter. 
 - **Earning Projections**: Calculate potential earnings based on hourly rates
 - **Data Export**: Export time entries as CSV files for use in other systems
 
+<img src="screenshots/stats-screen.png" alt="Billable App Preview" width="250"/>
+
 ### Settings and Preferences
 - **Dark Mode**: Toggle between light and dark themes
 - **Default Currency**: Set your preferred currency for rate calculations
 - **Default Hours**: Configure your standard working day length
 - **Data Backup**: Export and import your database for safekeeping
+
+<img src="screenshots/settings-screen.png" alt="Billable App Preview" width="250"/>
+
 
 ## Getting Started
 
@@ -35,7 +42,7 @@ Billable is a powerful yet simple time tracking application built with Flutter. 
 Download and install the latest version from the releases section or build from source:
 
 ```bash
-git clone https://github.com/yourusername/billable.git
+git clone https://github.com/NRB13/billable.git
 cd billable
 flutter pub get
 flutter run
