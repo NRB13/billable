@@ -13,7 +13,7 @@ class DatabaseService {
   static const String _databaseName = 'billable.db';
   
   // Database version - increase this number when schema changes
-  static const int _databaseVersion = 2;
+  static const int _databaseVersion = 3;
   
   // Singleton constructor
   factory DatabaseService() {
@@ -69,11 +69,12 @@ class DatabaseService {
       await _upgradeToV2(db);
     }
     
-    // For future versions, add more conditions:
-    // if (oldVersion < 3) {
-    //   await _upgradeToV3(db);
-    // }
+    // Upgrade from version 2 to 3 (adding ID reference columns to time_entries)
+    if (oldVersion < 3) {
+      await _upgradeToV3(db);
+    }
     
+    // For future versions, add more conditions:
     // if (oldVersion < 4) {
     //   await _upgradeToV4(db);
     // }
@@ -218,17 +219,33 @@ class DatabaseService {
     }
   }
   
+  // Add ID columns to time_entries table
+  Future<void> _upgradeToV3(Database db) async {
+    try {
+      if (kDebugMode) debugPrint('Upgrading time_entries table with ID columns...');
+      
+      // Add new client_id, project_id, and task_id columns
+      await db.execute('ALTER TABLE time_entries ADD COLUMN client_id INTEGER');
+      await db.execute('ALTER TABLE time_entries ADD COLUMN project_id INTEGER');
+      await db.execute('ALTER TABLE time_entries ADD COLUMN task_id INTEGER');
+      
+      if (kDebugMode) debugPrint('Time entries table upgraded successfully');
+    } catch (e) {
+      if (kDebugMode) debugPrint('Error upgrading database to V3: $e');
+    }
+  }
+
   // Example template for future migrations
-  // Future<void> _upgradeToV3(Database db) async {
+  // Future<void> _upgradeToV4(Database db) async {
   //   try {
-  //     // Add new tables or columns for V3
+  //     // Add new tables or columns for V4
   //     await db.execute('''
   //       ALTER TABLE settings ADD COLUMN new_feature INTEGER DEFAULT 0
   //     ''');
   //     
   //     // Other migration steps...
   //   } catch (e) {
-  //     if (kDebugMode) debugPrint('Error upgrading database to V3: $e');
+  //     if (kDebugMode) debugPrint('Error upgrading database to V4: $e');
   //   }
   // }
   
@@ -249,7 +266,10 @@ class DatabaseService {
         date TEXT NOT NULL,
         hours REAL NOT NULL,
         is_billable INTEGER NOT NULL DEFAULT 1,
-        is_submitted INTEGER NOT NULL DEFAULT 0
+        is_submitted INTEGER NOT NULL DEFAULT 0,
+        client_id INTEGER,
+        project_id INTEGER,
+        task_id INTEGER
       )
     ''');
     
@@ -676,6 +696,15 @@ class DatabaseService {
     }
   }
   
+  Future<List<Map<String, dynamic>>> getClientByName(String name) async {
+    final db = await database;
+    return await db.query(
+      'clients',
+      where: 'name = ?',
+      whereArgs: [name],
+    );
+  }
+  
   // Project methods
   Future<List<Map<String, dynamic>>> getProjects({int? clientId}) async {
     final db = await database;
@@ -695,6 +724,15 @@ class DatabaseService {
         ORDER BY c.name, p.name
       ''');
     }
+  }
+  
+  Future<List<Map<String, dynamic>>> getProjectByNameAndClient(String name, int clientId) async {
+    final db = await database;
+    return await db.query(
+      'projects',
+      where: 'name = ? AND client_id = ?',
+      whereArgs: [name, clientId],
+    );
   }
   
   Future<int> saveProject(Map<String, dynamic> project) async {
@@ -736,6 +774,15 @@ class DatabaseService {
         ORDER BY c.name, p.name, t.name
       ''');
     }
+  }
+  
+  Future<List<Map<String, dynamic>>> getTaskByNameAndProject(String name, int projectId) async {
+    final db = await database;
+    return await db.query(
+      'tasks',
+      where: 'name = ? AND project_id = ?',
+      whereArgs: [name, projectId],
+    );
   }
   
   Future<int> saveTask(Map<String, dynamic> task) async {
@@ -794,5 +841,26 @@ class DatabaseService {
       if (kDebugMode) debugPrint('Error importing database: $e');
       rethrow;
     }
+  }
+
+  Future<List<Map<String, dynamic>>> getRecentTimeEntries(int limit) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT 
+        t.id, 
+        t.client_name, 
+        t.project_name, 
+        t.task_name, 
+        t.date, 
+        t.hours, 
+        t.is_billable, 
+        t.is_submitted, 
+        t.notes
+      FROM time_entries t
+      ORDER BY t.date DESC, t.id DESC
+      LIMIT ?
+    ''', [limit]);
+    
+    return maps;
   }
 }

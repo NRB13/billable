@@ -10,7 +10,8 @@ import 'providers/settings_provider.dart';
 import 'providers/client_provider.dart';
 import 'providers/project_provider.dart';
 import 'providers/task_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/dashboard_screen.dart';
+import 'constants/app_constants.dart';
 
 void main() async {
   // Ensure Flutter is initialized before using platform channels
@@ -45,11 +46,29 @@ class BillableApp extends StatelessWidget {
           title: 'Billable',
           theme: ThemeData(
             primarySwatch: Colors.blue,
-            brightness: settings.isDarkMode ? Brightness.dark : Brightness.light,
+            brightness: Brightness.light,
+            primaryColor: AppConstants.primaryColor,
+            // Using theme-specific properties directly
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: AppConstants.primaryButtonStyle,
+            ),
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: AppConstants.secondaryButtonStyle,
+            ),
+            listTileTheme: AppConstants.unifiedListTileTheme(),
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             primarySwatch: Colors.blue,
+            primaryColor: AppConstants.primaryColor,
+            // Using theme-specific properties directly
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: AppConstants.primaryButtonStyle,
+            ),
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: AppConstants.secondaryButtonStyle,
+            ),
+            listTileTheme: AppConstants.unifiedListTileTheme(),
           ),
           themeMode: settings.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           localizationsDelegates: const [
@@ -60,7 +79,7 @@ class BillableApp extends StatelessWidget {
           supportedLocales: const [
             Locale('en', ''),
           ],
-          home: const HomeScreen(),
+          home: const DashboardScreen(),
         );
       }
     );

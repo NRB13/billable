@@ -10,6 +10,9 @@ class TimeEntry {
   final double hours;
   final bool isBillable;
   final bool isSubmitted;
+  final int? clientId;
+  final int? projectId;
+  final int? taskId;
 
   TimeEntry({
     this.id,
@@ -21,6 +24,9 @@ class TimeEntry {
     required this.hours,
     required this.isBillable,
     this.isSubmitted = false,
+    this.clientId,
+    this.projectId,
+    this.taskId,
   });
 
   // Convert TimeEntry to a Map for SQLite insertion
@@ -35,6 +41,9 @@ class TimeEntry {
       'hours': hours,
       'is_billable': isBillable ? 1 : 0,
       'is_submitted': isSubmitted ? 1 : 0,
+      'client_id': clientId,
+      'project_id': projectId,
+      'task_id': taskId,
     };
   }
 
@@ -50,6 +59,9 @@ class TimeEntry {
       hours: map['hours'],
       isBillable: map['is_billable'] == 1,
       isSubmitted: map['is_submitted'] == 1,
+      clientId: map['client_id'],
+      projectId: map['project_id'],
+      taskId: map['task_id'],
     );
   }
 
@@ -82,6 +94,9 @@ class TimeEntry {
     double? hours,
     bool? isBillable,
     bool? isSubmitted,
+    int? clientId,
+    int? projectId,
+    int? taskId,
   }) {
     return TimeEntry(
       id: id ?? this.id,
@@ -93,6 +108,9 @@ class TimeEntry {
       hours: hours ?? this.hours,
       isBillable: isBillable ?? this.isBillable,
       isSubmitted: isSubmitted ?? this.isSubmitted,
+      clientId: clientId ?? this.clientId,
+      projectId: projectId ?? this.projectId,
+      taskId: taskId ?? this.taskId,
     );
   }
 }

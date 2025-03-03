@@ -45,6 +45,68 @@ class AppConstants {
     color: textSecondaryColor,
   );
 
+  // Unified Card Styling - For consistent design across the app
+  static BoxDecoration cardGradientDecoration(BuildContext context, {Color? customColor}) {
+    final color = customColor ?? primaryColor;
+    
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(16),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          color.withAlpha(8),
+          color.withAlpha(18),
+        ],
+      ),
+    );
+  }
+  
+  static RoundedRectangleBorder cardBorder(BuildContext context, {Color? customColor}) {
+    final color = customColor ?? primaryColor;
+    
+    return RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: BorderSide(
+        color: color.withAlpha(13),
+        width: 1,
+      ),
+    );
+  }
+  
+  // Section Header Style
+  static Widget sectionHeader(String title, {Color? color, TextStyle? textStyle, BuildContext? context}) {
+    final headerColor = color ?? primaryColor;
+    final headerTextStyle = textStyle ?? (context != null 
+        ? TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+          )
+        : const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ));
+    
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 20,
+          decoration: BoxDecoration(
+            color: headerColor,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: headerTextStyle,
+        ),
+      ],
+    );
+  }
+
   // Form Field Decorations
   static InputDecoration inputDecoration(String label, String hint) {
     return InputDecoration(
@@ -104,4 +166,16 @@ class AppConstants {
       borderRadius: BorderRadius.circular(8),
     ),
   );
+  
+  // List Tile Theme for Drawer and Lists
+  static ListTileThemeData unifiedListTileTheme() {
+    return const ListTileThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      minLeadingWidth: 24,
+      dense: true,
+    );
+  }
 }

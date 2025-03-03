@@ -19,15 +19,26 @@ class TimeEntryProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     
-    _timeEntries = await _databaseService.getAllTimeEntries();
-    
-    _isLoading = false;
-    notifyListeners();
+    try {
+      _timeEntries = await _databaseService.getAllTimeEntries();
+    } catch (e) {
+      debugPrint('Error loading time entries: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   // Refresh time entries from database
   Future<void> refreshTimeEntries() async {
-    await _loadTimeEntries();
+    try {
+      final entries = await _databaseService.getAllTimeEntries();
+      
+      _timeEntries = entries;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error refreshing time entries: $e');
+    }
   }
 
   // Add a new time entry
@@ -156,5 +167,82 @@ class TimeEntryProvider with ChangeNotifier {
   // Get productivity metrics
   Future<Map<String, dynamic>> getProductivityMetrics() async {
     return await _databaseService.getProductivityMetrics();
+  }
+
+  // Helper method to group entries by client
+  Map<String, List<TimeEntry>> groupEntriesByClient(List<TimeEntry> entries) {
+    final Map<String, List<TimeEntry>> groupedEntries = {};
+    
+    for (var entry in entries) {
+      if (!groupedEntries.containsKey(entry.clientName)) {
+        groupedEntries[entry.clientName] = [];
+      }
+      groupedEntries[entry.clientName]!.add(entry);
+    }
+    
+    return groupedEntries;
+  }
+  
+  // Helper method to group entries by project within a client
+  Map<String, List<TimeEntry>> groupEntriesByProject(List<TimeEntry> clientEntries) {
+    final Map<String, List<TimeEntry>> groupedEntries = {};
+    
+    for (var entry in clientEntries) {
+      if (!groupedEntries.containsKey(entry.projectName)) {
+        groupedEntries[entry.projectName] = [];
+      }
+      groupedEntries[entry.projectName]!.add(entry);
+    }
+    
+    return groupedEntries;
+  }
+  
+  // Calculate total hours for a list of entries
+  double calculateTotalHours(List<TimeEntry> entries) {
+    double total = 0.0;
+    for (var entry in entries) {
+      total += entry.hours;
+    }
+    return total;
+  }
+  
+  // Calculate billable percentage for a list of entries
+  double calculateBillablePercentage(List<TimeEntry> entries) {
+    if (entries.isEmpty) return 0.0;
+    
+    int billableCount = entries.where((entry) => entry.isBillable).length;
+    return (billableCount / entries.length) * 100;
+  }
+  
+  // Get recent entries
+  Future<List<Map<String, dynamic>>> getRecentEntries(int limit) async {
+    return await _databaseService.getRecentTimeEntries(limit);
+  }
+  
+  // Get total hours for a specific day
+  Future<double> getTotalHoursForDay(DateTime date) async {
+    DateTime startOfDay = DateTime(date.year, date.month, date.day);
+    DateTime endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+    
+    final entries = await _databaseService.getTimeEntriesInDateRange(
+        startOfDay, endOfDay);
+    
+    double total = 0.0;
+    for (var entry in entries) {
+      total += entry.hours;
+    }
+    return total;
+  }
+  
+  // Get total hours for a date range
+  Future<double> getTotalHoursForDateRange(DateTime startDate, DateTime endDate) async {
+    final entries = await _databaseService.getTimeEntriesInDateRange(
+        startDate, endDate);
+    
+    double total = 0.0;
+    for (var entry in entries) {
+      total += entry.hours;
+    }
+    return total;
   }
 }
